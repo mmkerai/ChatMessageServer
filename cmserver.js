@@ -216,6 +216,7 @@ function cleanText(mytext) {
 	var clean = mytext.replace(/<\/?[^>]+(>|$)/g, "");	// take out html tags
 	var clean2 = clean.replace(/(\r\n|\n|\r)/g,"");	// take out new lines
 	var clean3 = clean2.replace(/["']/g,"");	// take out single and double quotes
+	console.log("Clean Text: "+clean3);
 	return(clean3);
 }
 
