@@ -317,7 +317,7 @@ function BC_API_Request(api_method,params,callBackFunction) {
 	var auth = AID + ':' + SETTINGSID + ':' + (new Date()).getTime();
 	var authHash = auth + ':' + crypto.createHash('sha512').update(auth + KEY).digest('hex');
 	var options = {
-		host : 'api.boldchat.com',
+		host : 'api-eu.boldchat.com',
 		port : 443,
 		path : '/aid/'+AID+'/data/rest/json/v1/'+api_method+'?auth='+authHash+'&'+params,
 		method : 'GET',
