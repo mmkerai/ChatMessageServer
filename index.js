@@ -57,9 +57,9 @@ $(document).ready(function() {
 			str += "Chat ID:"+data.chatID+"<br/>";
 			str += "Dept Name:"+data.deptName+"<br/>";
 			str += "Name:"+data.name+"<br/>";
-			str += "Date"+data.date+"<br/>";
-			str += "Time"+data.time+"<br/>";
-			str += "Message"+data.text+"<br/>";
+			str += "Date:"+data.date+"<br/>";
+			str += "Time:"+data.time+"<br/>";
+			str += "Message:"+data.text+"<br/>";
 
 		$("#message1").html(str);
 	});	

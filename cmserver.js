@@ -197,7 +197,7 @@ function doStartOfDay() {
 	sleep(100);
 	getApiData("getOperators",0,operatorsCallback);
 	sleep(100);
-	chatMsgTimerID = setInterval(updateChatMsgTimer,10000);
+//	chatMsgTimerID = setInterval(updateChatMsgTimer,10000);
 }
 
 function sleep(milliseconds) {
@@ -209,6 +209,14 @@ function sleep(milliseconds) {
 			break;
 		}
 	}
+}
+
+function cleanText(mytext) {
+	if(typeof mytext !== 'string') return(mytext);
+	var clean = mytext.replace(/<\/?[^>]+(>|$)/g, "");	// take out html tags
+	var clean2 = clean.replace(/(\r\n|\n|\r)/g,"");	// take out new lines
+	var clean3 = clean2.replace(/["']/g,"");	// take out single and double quotes
+	return(clean3);
 }
 
 function validateSignature(body, triggerUrl) {
@@ -460,6 +468,16 @@ function getApiData(method,params,fcallback,cbparam) {
 	});
 }
 
+function objectToCsv(cmobj) {
+	var str = "";
+	for(var key in cmobj)
+	{
+		str = str +"\""+cmobj[key]+ "\",";
+	}
+	str += "\r\n";
+	return(str);
+}
+
 function getCsvChatMsgs() {
 	var key, value;
 	var csvChats = "";
@@ -496,10 +514,11 @@ function processChatMessage(cMsg) {
 	
 	cmobj.date = getDateFromISODate(cMsg.CMCreated);
 	cmobj.time = getTimeFromISODate(cMsg.CMCreated);
-	cmobj.text = cMsg.CMText;
+	cmobj.text = cleanText(cMsg.CMText);
+//	debugLog("CMObject",cmobj);
 	AllChatMessages.push(cmobj);
-	debugLog("CMObject",cmobj);
 	io.sockets.in(MESSAGEROOM).emit('chatMessage',cmobj);
+	postToFile(objectToCsv);
 }
 
 function removeSocket(id, evname) {
