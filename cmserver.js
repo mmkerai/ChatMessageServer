@@ -518,7 +518,8 @@ function processChatMessage(cMsg) {
 //	debugLog("CMObject",cmobj);
 	AllChatMessages.push(cmobj);
 	io.sockets.in(MESSAGEROOM).emit('chatMessage',cmobj);
-	postToFile(objectToCsv);
+	var csv = objectToCsv(cmobj);
+	postToFile(csv);
 }
 
 function removeSocket(id, evname) {
