@@ -407,6 +407,7 @@ function operatorsCallback(dlist) {
 		Operators[dlist[i].LoginID] = new OpMetrics(dlist[i].LoginID,dlist[i].Name);																			
 	}
 	sendToLogs("No of Operators: "+Object.keys(Operators).length);
+	OperatorsSetupComplete = true;
 }
 
 
