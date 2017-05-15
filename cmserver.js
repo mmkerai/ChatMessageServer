@@ -161,7 +161,7 @@ var OpMetrics = function(opid,name) {
 };
 
 //******* Global class for chat message
-var chatMessage = function(chatid) {
+var ChatMessage = function(chatid) {
 		this.chatID = chatid;
 		this.deptName = "";
 		this.name = "";
