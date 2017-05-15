@@ -102,7 +102,7 @@ app.get('/bootstrap.min.css', function(req, res){
 app.post('/chatMessage', function(req, res){
 	Exceptions.chatMessages++;
 	res.send({ "result": "success" });
-	if(validateSignature(req.body, TriggerDomain+'/chatMessage'))
+//	if(validateSignature(req.body, TriggerDomain+'/chatMessage'))
 	{
 		sendToLogs("New Chat Message, chat id: "+req.body.ChatID);
 		if(OperatorsSetupComplete)		//make sure all static data has been obtained first
@@ -497,6 +497,7 @@ function processChatMessage(cMsg) {
 	cmobj.time = getTimeFromISODate(cMsg.CMCreated);
 	cmobj.text = cMsg.CMText;
 	AllChatMessages.push(cmobj);
+	debugLog("CMObject",cmobj);
 	io.sockets.in(MESSAGEROOM).emit('chatMessage',cmobj);
 }
 
