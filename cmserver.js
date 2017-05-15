@@ -98,6 +98,18 @@ app.get('/bootstrap.min.css', function(req, res){
 	res.sendFile(__dirname + '/bootstrap.min.css');
 });
 
+// Process incoming Boldchat triggered chat data
+app.post('/chatMessage', function(req, res){
+	Exceptions.chatMessages++;
+	res.send({ "result": "success" });
+	if(validateSignature(req.body, TriggerDomain+'/chatMessage'))
+	{
+		sendToLogs("New Chat Message, chat id: "+req.body.ChatID);
+		if(OperatorsSetupComplete)		//make sure all static data has been obtained first
+			processChatMessage(req.body);
+	}
+});
+
 process.on('uncaughtException', function (err) {
   console.log('Exception: ' + err);
 });
@@ -171,18 +183,6 @@ var StartOfDay;			// global time for start of the day before all stats are reset
 var EndOfDay;			// global time for end of the day before all stats are reset
 var Exceptions;
 var chatMsgTimerID;
-
-// Process incoming Boldchat triggered chat data
-app.post('/chatMessage', function(req, res){
-	Exceptions.chatMessages++;
-	res.send({ "result": "success" });
-	if(validateSignature(req.body, TriggerDomain+'/chatMessage'))
-	{
-		sendToLogs("New Chat Message, chat id: "+req.body.ChatID);
-		if(OperatorsSetupComplete)		//make sure all static data has been obtained first
-			processChatMessage(req.body);
-	}
-});
 
 console.log("Server started on port "+PORT);
 doStartOfDay();		// initialise everything

@@ -51,7 +51,18 @@ $(document).ready(function() {
 		str += 	"</table>";	
 		$("#message1").html(str);
 	});	
+	// this returns an object of operator objects
+	socket.on('chatMessage',function(data){
+		var str = "New message: <br/>";
+			str += "Chat ID:"+data[i].chatID+"<br/>";
+			str += "Dept Name:"+data[i].deptName+"<br/>";
+			str += "Name:"+data[i].name+"<br/>";
+			str += "Date"+data[i].date+"<br/>";
+			str += "Time"+data[i].time+"<br/>";
+			str += "Message"+data[i].text+"<br/>";
 
+		$("#message1").html(str);
+	});	
 });
 
 /*
