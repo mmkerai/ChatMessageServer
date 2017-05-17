@@ -10,6 +10,7 @@
 		"socket.io":"latest",
 		"express":"latest",
 		"dateformat":"latest",
+		"decode-html":"latest",
 		"request": "latest"
 	}
 }
