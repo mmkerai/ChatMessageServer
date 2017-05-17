@@ -13,6 +13,8 @@ var fs = require('fs');
 var crypto = require('crypto');
 var bodyParser = require('body-parser');
 var dateFormat = require('dateformat');
+var decode = require('decode-html');
+
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
@@ -515,7 +517,8 @@ function processChatMessage(cMsg) {
 	
 	cmobj.date = getDateFromISODate(cMsg.CMCreated);
 	cmobj.time = getTimeFromISODate(cMsg.CMCreated);
-	cmobj.text = cleanText(cMsg.CMText);
+	console.log("Text: "+decode(cMsg.CMText));
+	cmobj.text = cleanText(decode(cMsg.CMText));
 //	debugLog("CMObject",cmobj);
 	AllChatMessages.push(cmobj);
 	io.sockets.in(MESSAGEROOM).emit('chatMessage',cmobj);
