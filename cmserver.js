@@ -508,10 +508,9 @@ function getCsvChatMsgs() {
 }
 
 function processChatMessage(cMsg) {
-	var whoended;
 	var cmobj = new ChatMessage(cMsg.ChatID);
 	cmobj.deptName = Departments[cMsg.DepartmentID];
-	if(cMsg.Ended == "")	// this is a message not chat ended event
+	if(cMsg.EndedReasonType == "")	// this is a message not chat ended event
 	{
 		if(cMsg.CMPersonType == 1)		// if visitor sent this
 			cmobj.name = cMsg.CMName;
@@ -526,13 +525,8 @@ function processChatMessage(cMsg) {
 	else
 	{
 		cmobj.date = getDateFromISODate(cMsg.Ended);
-		cmobj.time = getTimeFromISODate(cMsg.Ended);
-		if(cMsg.EndedBy == "")		// blank means not set to operator ID
-			whoended = "Visitor";
-		else
-			whoended = "Advisor"
-		
-		cmobj.text = cMsg.ChatID + "_"+whoended+"_ended_chat";	
+		cmobj.time = getTimeFromISODate(cMsg.Ended);		
+		cmobj.text = cMsg.ChatID + "_"+EndedReason[cMsg.EndedReasonType]+"_ended_chat";	
 	}
 //	debugLog("CMObject",cmobj);
 	AllChatMessages.push(cmobj);
