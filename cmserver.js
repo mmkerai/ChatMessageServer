@@ -43,6 +43,7 @@ var	io = require('socket.io').listen(server);
 
 //******* Get BoldChat API Credentials
 console.log("Reading API variables from config.json file...");
+const EndedReason = ["Unknown","Operator","Visitor","Disconnected"];
 var EnVars;
 var AID;
 var SETTINGSID;
@@ -100,7 +101,7 @@ app.get('/bootstrap.min.css', function(req, res){
 	res.sendFile(__dirname + '/bootstrap.min.css');
 });
 
-// Process incoming Boldchat triggered chat data
+// Process incoming Boldchat triggered chat message
 app.post('/chatMessage', function(req, res){
 	Exceptions.chatMessages++;
 	res.send({ "result": "success" });
@@ -263,13 +264,13 @@ function encryptSignature(unencryptedSignature) {
 	return hash.toUpperCase();
 }
 
-// TODO: returns the emplyee id from operator name in format "[sup name] nnnnnn op_name"
+// returns the emplyee id from operator name in format "[sup name] nnnnnn_opname"
 function getEmployeeIDfromName(name,opid) {
 	var regex = /[0-9]+/;
 	var eid = name.match(regex);
 	if(eid != null)
 	{
-		if(eid > 999)		// make sure this is an employee ID
+		if(eid > 9999)		// make sure this is an employee ID
 		{
 //			console.log("EID - "+eid);
 			return eid;
@@ -477,7 +478,7 @@ function objectToCsv(cmobj) {
 	{
 		str = str +"\""+cmobj[key]+ "\",";
 	}
-	str += "\r\n";
+//	str += "\r\n";
 	return(str);
 }
 
@@ -507,18 +508,32 @@ function getCsvChatMsgs() {
 }
 
 function processChatMessage(cMsg) {
-	
+	var whoended;
 	var cmobj = new ChatMessage(cMsg.ChatID);
 	cmobj.deptName = Departments[cMsg.DepartmentID];
-	if(cMsg.CMPersonType == 1)		// if visitor sent this
-		cmobj.name = cMsg.CMName;
-	else							// operator message
-		cmobj.name = getEmployeeIDfromOperatorID(cMsg.OperatorID);
-	
-	cmobj.date = getDateFromISODate(cMsg.CMCreated);
-	cmobj.time = getTimeFromISODate(cMsg.CMCreated);
-	console.log("Text: "+decode(cMsg.CMText));
-	cmobj.text = cleanText(decode(cMsg.CMText));
+	if(cMsg.Ended == "")	// this is a message not chat ended event
+	{
+		if(cMsg.CMPersonType == 1)		// if visitor sent this
+			cmobj.name = cMsg.CMName;
+		else							// operator message
+			cmobj.name = getEmployeeIDfromOperatorID(cMsg.OperatorID);
+		
+		cmobj.date = getDateFromISODate(cMsg.CMCreated);
+		cmobj.time = getTimeFromISODate(cMsg.CMCreated);
+		cmobj.text = cleanText(decode(cMsg.CMText));
+//		console.log("Text: "+decode(cMsg.CMText));
+	}
+	else
+	{
+		cmobj.date = getDateFromISODate(cMsg.Ended);
+		cmobj.time = getTimeFromISODate(cMsg.Ended);
+		if(cMsg.EndedBy == "")		// blank means not set to operator ID
+			whoended = "Visitor";
+		else
+			whoended = "Advisor"
+		
+		cmobj.text = cMsg.ChatID + "_"+whoended+"_ended_chat";	
+	}
 //	debugLog("CMObject",cmobj);
 	AllChatMessages.push(cmobj);
 	io.sockets.in(MESSAGEROOM).emit('chatMessage',cmobj);
