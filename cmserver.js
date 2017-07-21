@@ -45,9 +45,8 @@ var	io = require('socket.io').listen(server);
 console.log("Reading API variables from config.json file...");
 const EndedReason = ["Unknown","Operator","Visitor","Disconnected"];
 var EnVars;
-var AID;
-var SETTINGSID;
-var KEY;
+var AID,SETTINGSID,KEY;
+
 var STARTDAY;
 var TriggerDomain = "https://boldchat.techmbs.in";		// used to validate the signature of push data
 
@@ -108,8 +107,16 @@ app.post('/chatMessage', function(req, res){
 //	if(validateSignature(req.body, TriggerDomain+'/chatMessage'))
 	{
 		sendToLogs("New Chat Message, chat id: "+req.body.ChatID);
+		debugLog("New event",req.body);
 		if(OperatorsSetupComplete)		//make sure all static data has been obtained first
 			processChatMessage(req.body);
+	}
+});
+
+// GET request used to test connectivity
+app.get('/test', function(req, res){
+	res.send({ "result": "success" });
+	sendToLogs("Test Success: "+req.body.toString());
 	}
 });
 
@@ -130,9 +137,9 @@ io.on('connection', function(socket){
 
 	// join room which does the report every 3 mins and multicasts it to all subscribers
 	socket.on('join room',function(room){
-		console.log("Joining room "+room);
+		sendToLogs("Joining room "+room);
+		sendToLogs("Listening to POST on url/chatMessage and GET on url/test");
 		socket.join(room);
-//		socket.emit('chatMessage',object);
 	});
 	
 	socket.on('disconnect', function(data){
@@ -165,6 +172,7 @@ var OpMetrics = function(opid,name) {
 
 //******* Global class for chat message
 var ChatMessage = function(chatid) {
+//		this.id = "";
 		this.chatID = chatid;
 		this.deptName = "";
 		this.name = "";
@@ -174,7 +182,7 @@ var ChatMessage = function(chatid) {
 };
 
 //******************** Global constants for chat messages
-const MESSAGEROOM = "chat_message_room";	// socket room name for chat messages
+const MONITORROOM = "monitor_room";		// socket room name for monitoring this service
 
 //******************** Global variables for chat data
 var	Departments;	// array of dept ids and dept name objects
@@ -282,26 +290,24 @@ function getEmployeeIDfromName(name,opid) {
 // returns the employee id from operator ID 
 function getEmployeeIDfromOperatorID(opid) {
 	
-	var eid = Operators[opid].employeeID;
+	var eid = Operators[opid];
 	if(typeof eid === 'undefined')
 		return opid;
-	
-	return eid;
+
+	return(Operators[opid].employeeID);
 }
 
 // returns the the date from ISO date 
 function getDateFromISODate(isodate) {
 	
-	var isod = new Date(isodate);
-	var date = dateFormat(isod,"yyyy-mmm-dd");
+	var date = dateFormat(isodate,"yyyy-mmm-dd");
 	return(date);
 }
 
 // returns the the date from ISO date 
 function getTimeFromISODate(isodate) {
 	
-	var isod = new Date(isodate);
-	var time = dateFormat(isod,"HH:MM:ss:l");
+	var time = dateFormat(isodate,"HH:MM:ss:l");
 	return(time);
 }
 
@@ -367,7 +373,8 @@ function debugLog(name, dataobj) {
 
 function sendToLogs(text) {
 	console.log(text);
-	io.emit('consoleLogs', text);
+	io.sockets.in(MONITORROOM).emit('consoleLogs',text);
+//	io.emit('consoleLogs', text);
 }
 
 function deptsCallback(dlist) {
@@ -448,7 +455,6 @@ function getApiData(method,params,fcallback,cbparam) {
 		{
 			Exceptions.APIJsonError++;
 			emsg = TimeNow+ ": API did not return JSON message: "+str;
-			console.log(emsg);
 			sendToLogs(emsg);
 			return;
 		}
@@ -458,7 +464,6 @@ function getApiData(method,params,fcallback,cbparam) {
 		{
 			Exceptions.noJsonDataMsg++;
 			emsg = TimeNow+ ":"+method+": No data: "+str;
-			console.log(emsg);
 			sendToLogs(emsg);
 			return;
 		}
@@ -530,7 +535,8 @@ function processChatMessage(cMsg) {
 	}
 //	debugLog("CMObject",cmobj);
 	AllChatMessages.push(cmobj);
-	io.sockets.in(MESSAGEROOM).emit('chatMessage',cmobj);
+	io.sockets.in(MONITORROOM).emit('chatMessage',cmobj);
+//	DBInsert(cmobj);
 	var csv = objectToCsv(cmobj);
 	postToFile(csv);
 }
@@ -546,7 +552,7 @@ function updateChatMsgTimer() {
 	TimeNow = new Date();		// update the time for all calculations
 	if(TimeNow > EndOfDay)		// we have skipped to a new day
 	{
-		console.log(TimeNow.toISOString()+": New day started, stats reset");
+		sendToLogs(TimeNow.toISOString()+": New day started, stats reset");
 		clearInterval(chatMsgTimerID);
 		setTimeout(doStartOfDay,10000);	//restart after 10 seconds to give time for ajaxes to complete
 		return;
@@ -574,6 +580,6 @@ function postToFile(postdata) {
 	post_req.write(postdata);
 	post_req.end();
 	post_req.on('error', function(err){console.log("HTML error"+err.stack)});
-	console.log("Post to file complete");
+	sendToLogs("Post to file complete");
 }
 
