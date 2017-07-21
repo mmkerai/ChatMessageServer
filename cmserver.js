@@ -120,7 +120,7 @@ app.get('/test', function(req, res){
 	for(var key in req.body)
 	{
 		if(req.body.hasOwnProperty(key))
-			str += key +":"+req.body[key]+",");
+			str += key +":"+req.body[key]+",";
 	}
 	sendToLogs("Test Success: "+str);
 });
