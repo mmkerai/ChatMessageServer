@@ -115,8 +115,14 @@ app.post('/chatMessage', function(req, res){
 
 // GET request used to test connectivity
 app.get('/test', function(req, res){
-	res.send({ "result": "success" });
-	sendToLogs("Test Success: "+req.body.toString());
+	var str = "";
+	res.send({"result": "success"});
+	for(var key in req.body)
+	{
+		if(req.body.hasOwnProperty(key))
+			str += key +":"+req.body[key]+",");
+	}
+	sendToLogs("Test Success: "+str);
 });
 
 process.on('uncaughtException', function (err) {

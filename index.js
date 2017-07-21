@@ -111,7 +111,7 @@ $(document).ready(function() {
 		document.getElementById("dlog").scrollTop = document.getElementById("dlog").scrollHeight
 	});
 	socket.on('consoleLogs',function(data){
-		$('#dlog').append(data);
+		$('#dlog').append(data+"\r\n");
 		document.getElementById("dlog").scrollTop = document.getElementById("dlog").scrollHeight
 	});
 });
