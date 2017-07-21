@@ -117,7 +117,6 @@ app.post('/chatMessage', function(req, res){
 app.get('/test', function(req, res){
 	res.send({ "result": "success" });
 	sendToLogs("Test Success: "+req.body.toString());
-	}
 });
 
 process.on('uncaughtException', function (err) {
