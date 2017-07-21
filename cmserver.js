@@ -117,10 +117,10 @@ app.post('/chatMessage', function(req, res){
 app.get('/test', function(req, res){
 	var str = "";
 	res.send({"result": "success"});
-	for(var key in req.body)
+	for(var key in req.query)
 	{
-		if(req.body.hasOwnProperty(key))
-			str += key +":"+req.body[key]+",";
+		if(req.query.hasOwnProperty(key))
+			str += key +":"+req.query[key]+",";
 	}
 	sendToLogs("Test Success: "+str);
 });
